@@ -1,0 +1,8 @@
+{
+	"name": "com.mig.presentation",
+	"displayName": "Mig Presentation framework",
+	"version": "0.0.1",
+	"unity": "2019.4",
+	"description": "",
+	"dependencies": {}
+}
