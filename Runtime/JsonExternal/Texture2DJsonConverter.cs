@@ -14,26 +14,6 @@ namespace Mig
             return typeof(Texture2D).IsAssignableFrom(objectType);
         }
 
-        public Texture2D DeCompress(Texture2D source)
-        {
-            RenderTexture renderTex = RenderTexture.GetTemporary(
-                        source.width,
-                        source.height,
-                        0,
-                        RenderTextureFormat.Default,
-                        RenderTextureReadWrite.Linear);
-
-            Graphics.Blit(source, renderTex);
-            RenderTexture previous = RenderTexture.active;
-            RenderTexture.active = renderTex;
-            Texture2D readableText = new Texture2D(source.width, source.height);
-            readableText.ReadPixels(new Rect(0, 0, renderTex.width, renderTex.height), 0, 0);
-            readableText.Apply();
-            RenderTexture.active = previous;
-            RenderTexture.ReleaseTemporary(renderTex);
-            return readableText;
-        }
-
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             Texture2D texture = value as Texture2D;
@@ -49,12 +29,12 @@ namespace Mig
                 writer.WritePropertyName("type");
                 writer.WriteValue("Texture2D");
                 writer.WritePropertyName("textureData");
-                writer.WriteNull();  // 指示纹理不可读
+                writer.WriteNull();  
                 writer.WriteEndObject();
                 return;
             }
 
-            byte[] imageData = DeCompress(texture).EncodeToPNG();
+            byte[] imageData = texture.EncodeToPNG();
             if (imageData == null)
             {
                 Debug.LogWarning($"Failed to encode texture '{texture.name}' to PNG.");
@@ -79,46 +59,20 @@ namespace Mig
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var jsonObject = JObject.Load(reader);
-            var base64String = jsonObject["textureData"]?.ToString();
+            var base64String = reader.ReadAsString();
             if (string.IsNullOrEmpty(base64String))
             {
-                Debug.LogError("纹理数据无效");
-                return null;  // 返回null表示纹理数据无效
+                Debug.LogError("Fail to get texture json content");
+                return null; 
             }
 
             byte[] imageData = Convert.FromBase64String(base64String);
 
-            Texture2D texture = new Texture2D(2, 2);
-            bool isLoaded = texture.LoadImage(imageData);
-            if (!isLoaded)
-            {
-                Debug.LogError("Failed to load image data into Texture2D.");
-                return null;
-            }
-
-            // 生成唯一的文件名
-            string uniqueFileName = GenerateUniqueFileName("savedTexture", "png");
-            // 保存纹理到本地
-            SaveTextureToFile(texture, uniqueFileName); ;
+            Texture2D texture = new Texture2D(1, 1);
+            texture.LoadRawTextureData(imageData);
 
             Debug.Log("Loaded Texture2D successfully");
             return texture;
         }
-
-        private void SaveTextureToFile(Texture2D texture, string fileName)
-        {
-            byte[] bytes = texture.EncodeToPNG();
-            string path = Path.Combine(Application.persistentDataPath, fileName);
-            File.WriteAllBytes(path, bytes);
-            Debug.Log($"Texture saved to {path}");
-        }
-
-        private string GenerateUniqueFileName(string baseName, string extension)
-        {
-            string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-            return $"{baseName}_{timestamp}.{extension}";
-        }
-
     }
 }

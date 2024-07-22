@@ -13,7 +13,7 @@ namespace Mig
 
         private static JsonSerializerSettings settings => new JsonSerializerSettings
         {
-            Converters = new List<JsonConverter> { new JsonColorConverter() ,new Texture2DJsonConverter(),new Vector3JsonConverter(),new QuaternionJsonConverter()},
+            Converters = new List<JsonConverter> { new JsonColorConverter() ,new Texture2DJsonConverter() ,new Vector3JsonConverter(),new QuaternionJsonConverter()},
             TypeNameHandling = TypeNameHandling.All
         };
 
