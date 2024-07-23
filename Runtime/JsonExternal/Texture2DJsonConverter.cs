@@ -22,32 +22,7 @@ namespace Mig
                 throw new ArgumentException("Expected Texture2D object value.");
             }
 
-            if (!texture.isReadable)
-            {
-                Debug.LogWarning($"Texture '{texture.name}' is not readable. Make sure the texture is set to readable in the texture import settings.");
-                writer.WriteStartObject();
-                writer.WritePropertyName("type");
-                writer.WriteValue("Texture2D");
-                writer.WritePropertyName("textureData");
-                writer.WriteNull();  
-                writer.WriteEndObject();
-                return;
-            }
-
-            byte[] imageData = texture.EncodeToPNG();
-            if (imageData == null)
-            {
-                Debug.LogWarning($"Failed to encode texture '{texture.name}' to PNG.");
-                writer.WriteStartObject();
-                writer.WritePropertyName("type");
-                writer.WriteValue("Texture2D");
-                writer.WritePropertyName("textureData");
-                writer.WriteNull();  // ÷∏ æŒ∆¿Ì±‡¬Î ß∞‹
-                writer.WriteEndObject();
-                return;
-            }
-
-            string base64String = Convert.ToBase64String(imageData);
+            string base64String = Convert.ToBase64String(texture.EncodeToPNG());
 
             writer.WriteStartObject();
             writer.WritePropertyName("type");
