@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Mig
 {
-    public static class MigElementUtils
+    public static class MigElementManager
     {
         public static T GetOrAddCurrentStepElement<T>(this GameObject host) where T : MigElement, new()
         {
